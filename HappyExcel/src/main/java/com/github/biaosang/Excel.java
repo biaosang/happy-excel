@@ -1,5 +1,6 @@
 package com.github.biaosang;
 
+import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -32,7 +33,6 @@ public class Excel {
     private void excel(String fileName,ExcelType excelType){
         this.excelType = excelType;
         this.fileName = fileName;
-        this.workbook = ExcelFactory.createWorkbook(excelType);
     }
     public <T> Excel addSheet(String sheetName,Class<T> clazz,List<T> data){
         return addSheet(sheetName,clazz,data,false,0);
@@ -42,6 +42,9 @@ public class Excel {
     }
 
     private <T> Excel createSheet(String sheetName,Class<T> clazz,List<T> data,boolean ignoreHeader,int startRow){
+        if(workbook == null){
+            this.workbook = ExcelFactory.createWorkbook(excelType);
+        }
         Sheet sheet = workbook.createSheet(sheetName);
         currentSheet = sheet;
         sheets.add(sheet);
@@ -55,6 +58,36 @@ public class Excel {
 
     public void export() throws IOException {
         workbook.write(Files.newOutputStream(Paths.get(fileName), StandardOpenOption.CREATE));
+        workbook.close();
+    }
+
+    public <T> void importSheet(String sheetName,Class<T> clazz,List<T> outputData,int startRow) throws Exception {
+        if(workbook == null){
+            workbook = ExcelFactory.createWorkbookFromFile(excelType,fileName);
+        }
+        Sheet sheet = workbook.getSheet(sheetName);
+        initSheet(sheet,clazz,outputData,startRow);
+    }
+
+    public <T> void importSheet(int sheetIndex,Class<T> clazz,List<T> outputData,int startRow) throws Exception {
+        if(workbook == null){
+            workbook = ExcelFactory.createWorkbookFromFile(excelType,fileName);
+        }
+        Sheet sheet = workbook.getSheetAt(sheetIndex);
+        initSheet(sheet,clazz,outputData,startRow);
+    }
+
+    private <T> void initSheet(Sheet sheet, Class<T> clazz,List<T> outputData,int startRow) throws Exception {
+        if(sheet == null){
+            throw new HappyExcelException("传入的sheet未在文件中找到");
+        }
+        if(outputData == null){
+            throw new HappyExcelException("存储数据的集合还未初始化");
+        }
+
+        DataHandler dataHandler = DataHandlerFactory.create(excelType,sheet);
+        dataHandler.loadData(clazz,outputData,startRow);
+
     }
 
 }

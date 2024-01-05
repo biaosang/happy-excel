@@ -22,6 +22,8 @@ public class User {
     @ExcelField(header = "生日",col = 2)
     private Date birth;
 
+    public User(){}
+
     public User(String name, int age, Date birth) {
         this.name = name;
         this.age = age;
@@ -47,6 +49,15 @@ public class User {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                ", birth=" + birth +
+                '}';
     }
 
     public static void main(String[] args) throws IOException {

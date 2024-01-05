@@ -11,14 +11,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class XlsxDataHandler {
-
-    private Sheet sheet;
-
-    private int currentRow;
+public class XlsxDataHandler extends DataHandler{
 
     public XlsxDataHandler(Sheet sheet){
-        this.sheet = sheet;
+        super(sheet);
+        super.excelType = ExcelType.XLSX;
     }
 
     public <T> void run(Class<T> clazz, List<T> data, boolean ignoreHeader, int startRow) throws Exception {
@@ -71,29 +68,10 @@ public class XlsxDataHandler {
         }
     }
 
-    protected void setCellValue(Row row,int col,Object value,String format){
-        if(value == null){
-            row.createCell(col).setCellValue("");
-            return ;
-        }
 
-        if(value instanceof Integer || value instanceof Double || value instanceof Float || value instanceof Long){
-            row.createCell(col).setCellValue(Double.parseDouble(String.valueOf(value)));
-        }else if(value instanceof Boolean){
-            row.createCell(col).setCellValue((Boolean)value);
-        }else if(value instanceof Date){
-            row.createCell(col).setCellValue(new SimpleDateFormat(format).format((Date)value));
-        }else if(value instanceof Calendar){
-            row.createCell(col).setCellValue(new SimpleDateFormat(format).format(((Calendar)value).getTime()));
-        }else if(value instanceof LocalDate){
-            row.createCell(col).setCellValue(((LocalDate)value).format(DateTimeFormatter.ofPattern(format)));
-        }else if(value instanceof LocalDateTime){
-            row.createCell(col).setCellValue(((LocalDateTime)value).format(DateTimeFormatter.ofPattern(format)));
-        }else if(value instanceof RichTextString){
-            row.createCell(col).setCellValue(((RichTextString)value).getString());
-        }else{
-            row.createCell(col).setCellValue((String)value);
-        }
 
+    @Override
+    protected <T> void loadData(Class<T> clazz, List<T> outputData, int startRow) throws Exception {
+        super.loadData(clazz, outputData, startRow);
     }
 }
